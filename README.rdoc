@@ -1,0 +1,115 @@
+= OpenStack Storage Service (swift) output plugin for Fluent event collector
+
+== Overview
+
+*swift* output plugin buffers event logs in local file and upload it to Swift periodically.
+
+This plugin splits files exactly by using the time of event logs (not the time when the logs are received). For example, a log '2011-01-02 message B' is reached, and then another log '2011-01-03 message B' is reached in this order, the former one is stored in "20110102.gz" file, and latter one in "20110103.gz" file.
+
+
+== Installation
+
+Simply use RubyGems:
+
+    gem install fluent-plugin-swift
+
+== Configuration
+
+    <match pattern>
+      type swift
+
+      auth_url https://your.swift.proxy/auth/v1.0 or https://your.keystone/v2.0
+      auth_user test:tester
+      auth_api_key testing
+      swift_container CONTAINER_NAME
+      swift_object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
+      ssl_verify false
+      
+      path logs/
+      buffer_path /var/log/fluent/swift
+
+      time_slice_format %Y%m%d-%H
+      time_slice_wait 10m
+      utc
+    </match>
+
+[auth_url] Authentication URL. ex. if you use TempAuth, https://your.swift.proxy/auth/v1.0 . Keystone Auth isn't tested yet.
+
+[auth_user] Authentication User Name. if you use TempAuth, auth_user is ACCOUNT:USER .
+
+[auth_tenant (optional, for keystone)] Authentication Tenant. if you use TempAuth, this isn't required.
+
+[auth_api_key] Authentication Key (Password).
+
+[swift_account (optional)] Account name. if this isn't provided, use default Account.
+
+[swift_container] Container name.
+
+[swift_object_key_format] The format of Swift object keys. You can use several built-in variables:
+
+- %{path}
+- %{time_slice}
+- %{index}
+- %{file_extension}
+
+to decide keys dynamically.
+
+%{path} is exactly the value of *path* configured in the configuration file. E.g., "logs/" in the example configuration above.
+%{time_slice} is the time-slice in text that are formatted with *time_slice_format*.
+%{index} is the sequential number starts from 0, increments when multiple files are uploaded to S3 in the same time slice.
+%{file_extention} is always "gz" for now.
+
+The default format is "%{path}%{time_slice}_%{index}.%{file_extension}".
+
+For instance, using the example configuration above, actual object keys on Swift will be something like:
+
+    "logs/20130111-22_0.gz"
+    "logs/20130111-23_0.gz"
+    "logs/20130111-23_1.gz"
+    "logs/20130112-00_0.gz"
+
+With the configuration:
+
+    swift_object_key_format %{path}/events/ts=%{time_slice}/events_%{index}.%{file_extension}
+    path log
+    time_slice_format %Y%m%d-%H
+
+You get:
+
+    "log/events/ts=20130111-22/events_0.gz"
+    "log/events/ts=20130111-23/events_0.gz"
+    "log/events/ts=20130111-23/events_1.gz"
+    "log/events/ts=20130112-00/events_0.gz"
+
+The {fluent-mixin-config-placeholders}[https://github.com/tagomoris/fluent-mixin-config-placeholders] mixin is also incorporated, so additional variables such as %{hostname}, %{uuid}, etc. can be used in the s3_object_key_format. This could prove useful in preventing filename conflicts when writing from multiple servers.
+
+    swift_object_key_format %{path}/events/ts=%{time_slice}/events_%{index}-%{hostname}.%{file_extension}
+
+[store_as] archive format on Swift. You can use serveral format:
+
+- gzip (default)
+- json
+- text
+- lzo (Need lzop command)
+
+[auto_create_container] Create Swift bucket if it does not exists. Default is true.
+
+[path] path prefix of the files on Swift. Default is "" (no prefix).
+
+[buffer_path (required)] path prefix of the files to buffer logs.
+
+[time_slice_format] Format of the time used as the file name. Default is '%Y%m%d'. Use '%Y%m%d%H' to split files hourly.
+
+[time_slice_wait] The time to wait old logs. Default is 10 minutes. Specify larger value if old logs may reache.
+
+[utc] Use UTC instead of local time.
+
+
+== Copyright
+
+Copyright:: Copyright (c) 2013 Yuji Hagiwara.
+
+This software is based on fluent-plugin-s3 ( https://github.com/fluent/fluent-plugin-s3 ), written by Sadayuki Furuhashi, licensed by Apache License, Version 2.0.
+
+License::   Apache License, Version 2.0
+

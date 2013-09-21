@@ -23,12 +23,12 @@ class SwiftOutput < Fluent::TimeSlicedOutput
   include SetTimeKeyMixin
   config_set_default :include_time_key, false
 
-  config_param :auth_url :string
-  config_param :auth_user :string
-  config_param :auth_tenant :string, :default => nil
-  config_param :auth_api_key :string
-  config_param :swift_account :string, :default => nil
-  config_param :swift_container :string
+  config_param :auth_url, :string
+  config_param :auth_user, :string
+  config_param :auth_tenant, :string, :default => nil
+  config_param :auth_api_key, :string
+  config_param :swift_account, :string, :default => nil
+  config_param :swift_container, :string
   config_param :swift_object_key_format, :string, :default => "%{path}%{time_slice}_%{index}.%{file_extension}"
   config_param :store_as, :string, :default => "gzip"
   config_param :auto_create_container, :bool, :default => true
@@ -36,8 +36,8 @@ class SwiftOutput < Fluent::TimeSlicedOutput
   config_param :proxy_uri, :string, :default => nil
   config_param :ssl_verify, :bool, :default => true
 
-  attr_reader :container
-
+#  attr_reader :container
+  
   include Fluent::Mixin::ConfigPlaceholders
 
   def placeholders
@@ -126,7 +126,7 @@ class SwiftOutput < Fluent::TimeSlicedOutput
         "index" => i
       }
       swift_path = @swift_object_key_format.gsub(%r(%{[^}]+})) { |expr|
-        values_for_s3_object_key[expr[2...expr.size-1]]
+        values_for_swift_object_key[expr[2...expr.size-1]]
       }
       i += 1
     end while check_object_exists(@swift_container, swift_path)
@@ -148,7 +148,10 @@ class SwiftOutput < Fluent::TimeSlicedOutput
         chunk.write_to(tmp)
         tmp.close
       end
-      @storage.put_object(@swift_container, swift_path, tmp, {:content_type => @mime_type)
+      File.open(tmp.path) do |file|
+        @storage.put_object(@swift_container, swift_path, file, {:content_type => @mime_type})
+      end
+      $log.info "Put Log to Swift. container=#{@swift_container} object=#{swift_path}"
     ensure
       tmp.close(true) rescue nil
       w.close rescue nil
@@ -180,4 +183,5 @@ class SwiftOutput < Fluent::TimeSlicedOutput
     return true
   end
 
+end
 end

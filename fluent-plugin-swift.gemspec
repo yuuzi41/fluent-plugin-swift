@@ -4,10 +4,10 @@ $:.push File.expand_path('../lib', __FILE__)
 Gem::Specification.new do |gem|
   gem.name        = "fluent-plugin-swift"
   gem.description = "OpenStack Storage Service (Swift) output plugin for Fluentd event collector"
-  gem.homepage    = "https://github.com/fluent/fluent-plugin-swift"
+  gem.homepage    = "https://github.com/yuuzi41/fluent-plugin-swift"
   gem.summary     = gem.description
   gem.version     = File.read("VERSION").strip
-  gem.authors     = ["Yuji Hagiwara"]
+  gem.authors     = ["yuuzi41"]
   gem.email       = ""
   gem.has_rdoc    = false
   #gem.platform    = Gem::Platform::RUBY

@@ -18,7 +18,7 @@ Simply use RubyGems:
     <match pattern>
       type swift
 
-      auth_url https://your.swift.proxy/auth/v1.0 or https://your.keystone/v2.0
+      auth_url https://your.swift.proxy/auth/v1.0 _or_ https://your.keystone/v2.0
       auth_user test:tester
       auth_api_key testing
       swift_container CONTAINER_NAME
@@ -33,7 +33,7 @@ Simply use RubyGems:
       utc
     </match>
 
-[auth_url] Authentication URL. ex. if you use TempAuth, https://your.swift.proxy/auth/v1.0 . Keystone Auth isn't tested yet.
+[auth_url] Authentication URL. Keystone Auth isn't tested yet.
 
 [auth_user] Authentication User Name. if you use TempAuth, auth_user is ACCOUNT:USER .
 

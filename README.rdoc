@@ -21,6 +21,7 @@ Simply use RubyGems:
       auth_url https://your.swift.proxy/auth/v1.0 _or_ https://your.keystone/v2.0
       auth_user test:tester
       auth_api_key testing
+      auth_region RegionOne
       swift_container CONTAINER_NAME
       swift_object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
       ssl_verify false
@@ -40,6 +41,8 @@ Simply use RubyGems:
 [auth_tenant (optional, for keystone)] Authentication Tenant. if you use TempAuth, this isn't required.
 
 [auth_api_key] Authentication Key (Password).
+
+[auth_region] Authentication Region. Optional, not required if there is only one region available.
 
 [swift_account (optional)] Account name. if this isn't provided, use default Account.
 

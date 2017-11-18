@@ -27,6 +27,7 @@ class SwiftOutput < Fluent::TimeSlicedOutput
   config_param :auth_user, :string
   config_param :auth_tenant, :string, :default => nil
   config_param :auth_api_key, :string
+  config_param :auth_region, :string, :default => nil
   config_param :swift_account, :string, :default => nil
   config_param :swift_container, :string
   config_param :swift_object_key_format, :string, :default => "%{path}%{time_slice}_%{index}.%{file_extension}"
@@ -88,7 +89,8 @@ class SwiftOutput < Fluent::TimeSlicedOutput
                       :openstack_auth_url => @auth_url,
                       :openstack_username => @auth_user,
                       :openstack_tenant => @auth_tenant,
-                      :openstack_api_key  => @auth_api_key
+                      :openstack_api_key => @auth_api_key,
+                      :openstack_region => @auth_region
     @storage.change_account @swift_account if @swift_account
 
     check_container

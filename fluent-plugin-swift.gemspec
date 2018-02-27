@@ -7,6 +7,7 @@ Gem::Specification.new do |gem|
   gem.homepage    = "https://github.com/yuuzi41/fluent-plugin-swift"
   gem.summary     = gem.description
   gem.version     = File.read("VERSION").strip
+  gem.license     = "Apache-2.0"
   gem.authors     = ["yuuzi41"]
   gem.email       = ""
   gem.has_rdoc    = false

@@ -1,0 +1,43 @@
+version: '3.0'
+networks:
+  efknetwork:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+services:
+  cloud:
+    image: openstack-swift-keystone-docker
+    restart: always
+    networks:
+      efknetwork:
+        aliases:
+          - cloud
+    ports:
+      - 35000:5000
+      - 35357:35357
+      - 38080:8080
+
+  fluentd:
+    image: "${fluentd_image_full}"
+    build:
+      context: fluentd
+      dockerfile: Dockerfile
+      args:
+        - http_proxy=$http_proxy
+        - https_proxy=$https_proxy
+        - no_proxy=$no_proxy
+        - RUBY_URL
+        - MIRROR_DEBIAN
+    restart: always
+    networks:
+      efknetwork:
+        aliases:
+          - fluentd
+    ports:
+      - 24224
+      - 5140
+      - 10514/udp
+    volumes:
+      - "${efk_stack_conf_dir}/fluentd/conf:/fluentd/etc:rw"
+      - "${efk_stack_data_dir}/logs:/fluentd/log"
+#    entrypoint: tail -f /etc/hosts

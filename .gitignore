@@ -1,2 +1,13 @@
-*.gem
+~*
+#*
+*~
+[._]*.s[a-w][a-z]
+.DS_Store
 
+*.gem
+.bundle
+Gemfile.lock
+vendor
+.ruby-version
+
+test/tmp/

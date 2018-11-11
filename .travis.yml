@@ -1,0 +1,36 @@
+language: ruby
+sudo: false
+
+rvm:
+  - 2.1.10
+  - 2.2.10
+  - 2.3.8
+  - 2.4.5
+  - 2.5.3
+  - ruby-head
+
+gemfile:
+ - Gemfile
+
+branches:
+  only:
+    - master
+    - v0.12
+
+before_install:
+  - gem update --system
+  - gem update bundler
+script:
+  - bundle exec rake test
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: 2.5.3
+    - rvm: 2.4.5
+
+addons:
+  apt:
+    packages:
+      - net-tools
+      - zlib1g-dev

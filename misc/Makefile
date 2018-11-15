@@ -17,7 +17,7 @@ export efk_stack_conf_dir = ${TEST_APP_PATH}/${EFK_SERVICE_NAME}-conf
 export efk_stack_data_dir = ${TEST_APP_DATA}
 
 export fluentd_image_full = ${APP}-fluentd:v1.1.3-debian
-
+export PLUGIN_VERSION=$(shell cat ../VERSION)
 build:
 	docker-compose -f ${EFK_DOCKER_COMPOSE_RUN} build  --no-cache --force-rm
 

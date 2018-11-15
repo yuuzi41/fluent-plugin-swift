@@ -19,17 +19,24 @@ module Fluent::Plugin
 
     desc "Path prefix of the files on Swift"
     config_param :path, :string, :default => ""
-    config_param :auth_url, :string
-    config_param :auth_user, :string
-    config_param :auth_api_key, :string
+    # openstack auth
+    desc "Authentication URL. If not set in conf, use env OS_AUTH_URL"
+    config_param :auth_url,      :string, default: ENV["OS_AUTH_URL"] || nil
+    desc "Authentication User Name. if you use TempAuth, auth_user is ACCOUNT:USER . If not set in conf, use env OS_USERNAME"
+    config_param :auth_user,     :string, default: ENV["OS_USERNAME"] || nil
+    desc "Authentication Key (Password). If not set in conf, use env OS_PASSWORD"
+    config_param :auth_api_key,  :string, default: ENV["OS_PASSWORD"] || nil
     # identity v2
-    config_param :auth_tenant, :string, :default => nil
+    config_param :auth_tenant,   :string, default: ENV["OS_TENANT_NAME"] || nil
     # identity v3
-    config_param :project_name, :string, :default => nil
-    config_param :domain_name, :string, :default => nil
+    desc "Authentication Project. If not set in conf, use env OS_PROJECT_NAME"
+    config_param :project_name,  :string, default: ENV["OS_PROJECT_NAME"] || nil
+    desc "Authentication Domain. If not set in conf, use env OS_PROJECT_DOMAIN_NAME"
+    config_param :domain_name,   :string, default: ENV["OS_PROJECT_DOMAIN_NAME"] || nil
     #
-    config_param :auth_region, :string, :default => nil
+    config_param :auth_region,   :string, default: ENV["OS_REGION_NAME"] || nil
     config_param :swift_account, :string, :default => nil
+
     desc "Swift container name"
     config_param :swift_container, :string
     desc "Archive format on Swift"
@@ -69,6 +76,22 @@ module Fluent::Plugin
       compat_parameters_convert(conf, :buffer, :formatter, :inject)
 
       super
+
+    unless !@auth_url.nil?
+     raise Fluent::ConfigError, "auth_url parameter or OS_AUTH_URL variable not defined"
+    end
+    unless !@auth_user.nil?
+     raise Fluent::ConfigError, "auth_user parameter or OS_USERNAME variable not defined"
+    end
+    unless !@auth_api_key.nil?
+     raise Fluent::ConfigError, "auth_api_key parameter or OS_PASSWORD variable not defined"
+    end
+    unless !@project_name.nil?
+     raise Fluent::ConfigError, "project_name parameter or OS_PROJECT_NAME variable not defined"
+    end
+    unless !@domain_name.nil?
+     raise Fluent::ConfigError, "domain_name parameter or OS_PROJECT_DOMAIN_NAME variable not defined"
+    end
 
     @ext, @mime_type = case @store_as
       when 'gzip' then ['gz', 'application/x-gzip']
@@ -119,7 +142,7 @@ module Fluent::Plugin
 #      rescue Fog::OpenStack::Storage::NotFound
         # ignore NoSuchBucket Error because ensure_bucket checks it.
       rescue => e
-        raise "can't call Swift API. Please check your credentials or auth_url configuration. error = #{e.inspect}"
+        raise "can't call Swift API. Please check your ENV OS_*, your credentials or auth_url configuration. error = #{e.inspect}"
       end
 
       @storage.change_account @swift_account if @swift_account

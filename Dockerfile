@@ -7,7 +7,7 @@ ADD . $app
 WORKDIR $app
 RUN buildDeps="sudo make gcc g++ libc-dev ruby-dev build-essential git zlib1g-dev liblzma-dev net-tools" && \
     echo "$http_proxy $no_proxy" && set -x && [ -z "$MIRROR_DEBIAN" ] || \
-     sed -i.orig -e "s|http://deb.debian.org/debian|$MIRROR_DEBIAN/debian9|g ; s|http://security.debian.org/debian-security|$MIRROR_DEBIAN/debian9-security|g" /etc/apt/sources.list && \
+     sed -i.orig -e "s|http://deb.debian.org\([^[:space:]]*\)|$MIRROR_DEBIAN/debian9|g ; s|http://security.debian.org\([^[:space:]]*\)|$MIRROR_DEBIAN/debian9-security|g" /etc/apt/sources.list ; \
   apt-get update -qq && \
   apt-get install -qy --no-install-recommends $buildDeps && \
    ( set -ex ; echo 'gem: --no-document' >> /etc/gemrc && \

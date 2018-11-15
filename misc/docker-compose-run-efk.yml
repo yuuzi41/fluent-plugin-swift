@@ -28,6 +28,13 @@ services:
         - no_proxy=$no_proxy
         - RUBY_URL
         - MIRROR_DEBIAN
+    environment:
+       - OS_AUTH_URL
+       - OS_USERNAME
+       - OS_PASSWORD
+       - OS_PROJECT_NAME
+       - OS_PROJECT_DOMAIN_NAME
+       - OS_REGION_NAME
     restart: always
     networks:
       efknetwork:

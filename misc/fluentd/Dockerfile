@@ -6,8 +6,8 @@ COPY fluent-plugin-swift-0.0.4rc1.gem /
 RUN buildDeps="sudo make gcc g++ libc-dev ruby-dev build-essential zlib1g-dev liblzma-dev" ; \
     runDeps="net-tools" ; \
     echo "$http_proxy $no_proxy" && set -x && [ -z "$MIRROR_DEBIAN" ] || \
-     sed -i.orig -e "s|http://deb.debian.org/debian|$MIRROR_DEBIAN/debian9|g ; s|http://security.debian.org/debian-security|$MIRROR_DEBIAN/debian9-security|g" /etc/apt/sources.list ; \
-    apt-get update && \
+     sed -i.orig -e "s|http://deb.debian.org\([^[:space:]]*\)|$MIRROR_DEBIAN/debian9|g ; s|http://security.debian.org\([^[:space:]]*\)|$MIRROR_DEBIAN/debian9-security|g" /etc/apt/sources.list ; \
+  apt-get update -qq && \
     apt-get install -y --no-install-recommends $buildDeps $runDeps && \
     ( set -ex ; echo 'gem: --no-document' >> /etc/gemrc && \
     [ -z "$http_proxy" ] || gem_proxy=" -p $http_proxy " ; \

@@ -54,15 +54,18 @@ With fluentd v1.0 and fluent-plugin-swift v1.0.0, use new buffer configuration t
 
     </match>
 
-[auth_url] Authentication URL. Keystone Auth isn't tested yet.
+[auth_url] Authentication URL. If not set in conf, use env OS_AUTH_URL
 
-[auth_user] Authentication User Name. if you use TempAuth, auth_user is ACCOUNT:USER .
+[auth_user] Authentication User Name. if you use TempAuth, auth_user is ACCOUNT:USER . If not set in conf, use env OS_USERNAME
 
-[auth_tenant (optional, for keystone)] Authentication Tenant. if you use TempAuth, this isn't required.
+[auth_tenant (optional, for keystone v2)] Authentication Tenant. if you use TempAuth, this isn't required.
 
-[auth_api_key] Authentication Key (Password).
+[project_name (keystone v3)] Authentication Project. If not set in conf, use env OS_PROJECT_NAME
+[domain_name (keystone v3)] Authentication Domain. If not set in conf, use env OS_PROJECT_DOMAIN_NAME
 
-[auth_region] Authentication Region. Optional, not required if there is only one region available.
+[auth_api_key] Authentication Key (Password). If not set in conf, use env OS_PASSWORD
+
+[auth_region] Authentication Region. Optional, not required if there is only one region available. If not set in conf, use env OS_REGION_NAME
 
 [swift_account (optional)] Account name. if this isn't provided, use default Account.
 

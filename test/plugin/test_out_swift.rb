@@ -11,7 +11,7 @@ class SwiftOutputTest < Test::Unit::TestCase
   end
 
   CONFIG = %[
-    auth_url https://127.0.0.1/auth/v1.0
+    auth_url https://127.0.0.1/auth/v3
     auth_user test:tester
     auth_api_key testing
     domain_name default
@@ -26,6 +26,10 @@ class SwiftOutputTest < Test::Unit::TestCase
     time_slice_format %Y%m%d-%H
     time_slice_wait 10m
     utc
+  ]
+
+  CONFIG_NONE = %[
+    swift_container CONTAINER_NAME
   ]
 
   def create_driver(conf = CONFIG)
@@ -46,14 +50,18 @@ class SwiftOutputTest < Test::Unit::TestCase
   end
 
   def test_configure
-#  test 'test_configure' do
     d = create_driver(CONFIG)
-    assert_equal 'https://127.0.0.1/auth/v1.0', d.instance.auth_url
     assert_equal 'test:tester', d.instance.auth_user
     assert_equal 'testing', d.instance.auth_api_key
     assert_equal 'RegionOne', d.instance.auth_region
     assert_equal 'CONTAINER_NAME', d.instance.swift_container
     assert_equal 'logs/', d.instance.path
+  end
+
+  def test_auth_url_empty
+    assert_raise_message(/auth_url parameter or OS_AUTH_URL variable not defined/) do
+      create_driver(CONFIG_NONE)
+    end
   end
 
 end

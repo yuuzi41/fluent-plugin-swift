@@ -1,0 +1,19 @@
+version: '3'
+services:
+  fluent-plugin-swift:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - http_proxy=$http_proxy
+        - https_proxy=$https_proxy
+        - no_proxy=$no_proxy
+        - RUBY_URL
+        - MIRROR_DEBIAN
+    environment:
+      - http_proxy=$http_proxy
+      - https_proxy=$https_proxy
+      - no_proxy=$no_proxy
+      - RUBY_URL
+      - MIRROR_DEBIAN
+    entrypoint: tail -f /etc/hosts

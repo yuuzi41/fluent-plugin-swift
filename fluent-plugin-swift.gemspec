@@ -10,17 +10,20 @@ Gem::Specification.new do |gem|
   gem.license     = "Apache-2.0"
   gem.authors     = ["yuuzi41"]
   gem.email       = ""
-  gem.has_rdoc    = false
+  #gem.has_rdoc    = false
   #gem.platform    = Gem::Platform::RUBY
   gem.files       = `git ls-files`.split("\n")
   gem.test_files  = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.executables = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.require_paths = ['lib']
 
-  gem.add_dependency "fluentd", "~> 0.12.0"
-  gem.add_dependency "fog", "~> 1.15.0"
-  gem.add_dependency "yajl-ruby", "~> 1.0"
-  gem.add_dependency "fluent-mixin-config-placeholders", "~> 0.2.0"
-  gem.add_development_dependency "rake", ">= 0.9.2"
+  gem.add_runtime_dependency "fluentd", [">= 0.14.2", "< 2"]
+  gem.add_runtime_dependency "fog-openstack"
+  gem.add_runtime_dependency "uuidtools"
   gem.add_development_dependency "flexmock", ">= 1.2.0"
+  gem.add_development_dependency "bundler", "~> 1.14"
+  gem.add_development_dependency "rake", "~> 12.0"
+  gem.add_development_dependency "test-unit", ">= 3.1.0"
+# fog
+  gem.add_dependency("xmlrpc") if RUBY_VERSION.to_s >= "2.4"
 end

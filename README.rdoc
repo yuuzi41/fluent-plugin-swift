@@ -7,6 +7,13 @@
 This plugin splits files exactly by using the time of event logs (not the time when the logs are received). For example, a log '2011-01-02 message B' is reached, and then another log '2011-01-03 message B' is reached in this order, the former one is stored in "20110102.gz" file, and latter one in "20110103.gz" file.
 
 
+== Requirements
+
+| fluent-plugin-swift  | fluentd | ruby |
+|-------------------|---------|------|
+| >= 1.0.0 | >= v0.14.0 | >= 2.1 |
+|  < 1.0.0 | >= v0.12.0 | >= 1.9 |
+
 == Installation
 
 Simply use RubyGems:
@@ -15,23 +22,36 @@ Simply use RubyGems:
 
 == Configuration
 
-    <match pattern>
-      type swift
+=== v1.0 style
 
-      auth_url https://your.swift.proxy/auth/v1.0 _or_ https://your.keystone/v2.0
+With fluentd v1.0 and fluent-plugin-swift v1.0.0, use new buffer configuration to dynamic parameters.
+
+
+    <match pattern>
+      @type swift
+
+      auth_url https://your.swift.proxy/auth/v1.0 _or_ https://your.keystone/v3.0
       auth_user test:tester
       auth_api_key testing
+      project_name test-project
+      domain_name "Default"
       auth_region RegionOne
       swift_container CONTAINER_NAME
-      swift_object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
       ssl_verify false
-      
-      path logs/
-      buffer_path /var/log/fluent/swift
 
-      time_slice_format %Y%m%d-%H
-      time_slice_wait 10m
-      utc
+      path logs/
+      swift_object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
+      <buffer tag,time>
+        @type file
+        path /var/log/fluent/swift
+        timekey 3600 # 1 hour partition
+        timekey_wait 10m
+        timekey_use_utc true # use utc
+      </buffer>
+      <format>
+        @type json
+      </format>
+
     </match>
 
 [auth_url] Authentication URL. Keystone Auth isn't tested yet.
@@ -59,7 +79,7 @@ to decide keys dynamically.
 
 %{path} is exactly the value of *path* configured in the configuration file. E.g., "logs/" in the example configuration above.
 %{time_slice} is the time-slice in text that are formatted with *time_slice_format*.
-%{index} is the sequential number starts from 0, increments when multiple files are uploaded to S3 in the same time slice.
+%{index} is the sequential number starts from 0, increments when multiple files are uploaded to Swift in the same time slice.
 %{file_extention} is always "gz" for now.
 
 The default format is "%{path}%{time_slice}_%{index}.%{file_extension}".
@@ -84,7 +104,7 @@ You get:
     "log/events/ts=20130111-23/events_1.gz"
     "log/events/ts=20130112-00/events_0.gz"
 
-The {fluent-mixin-config-placeholders}[https://github.com/tagomoris/fluent-mixin-config-placeholders] mixin is also incorporated, so additional variables such as %{hostname}, %{uuid}, etc. can be used in the s3_object_key_format. This could prove useful in preventing filename conflicts when writing from multiple servers.
+The {fluent-mixin-config-placeholders}[https://github.com/tagomoris/fluent-mixin-config-placeholders] mixin is also incorporated, so additional variables such as %{hostname}, %{uuid}, etc. can be used in the swift_object_key_format. This could prove useful in preventing filename conflicts when writing from multiple servers.
 
     swift_object_key_format %{path}/events/ts=%{time_slice}/events_%{index}-%{hostname}.%{file_extension}
 
@@ -95,7 +115,7 @@ The {fluent-mixin-config-placeholders}[https://github.com/tagomoris/fluent-mixin
 - text
 - lzo (Need lzop command)
 
-[auto_create_container] Create Swift bucket if it does not exists. Default is true.
+[auto_create_container] Create Swift container if it does not exists. Default is true.
 
 [path] path prefix of the files on Swift. Default is "" (no prefix).
 

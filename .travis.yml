@@ -12,10 +12,10 @@ rvm:
 gemfile:
  - Gemfile
 
-branches:
-  only:
-    - master
-    - v0.12
+#branches:
+#  only:
+#    - master
+#    - v0.12
 
 before_install:
   - gem update --system

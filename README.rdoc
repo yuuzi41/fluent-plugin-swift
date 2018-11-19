@@ -9,10 +9,10 @@ This plugin splits files exactly by using the time of event logs (not the time w
 
 == Requirements
 
-| fluent-plugin-swift  | fluentd | ruby |
-|-------------------|---------|------|
-| >= 1.0.0 | >= v0.14.0 | >= 2.1 |
-|  < 1.0.0 | >= v0.12.0 | >= 1.9 |
+   | fluent-plugin-swift  | fluentd | ruby |
+   |-------------------|---------|------|
+   | >= 0.0.4 | >= v0.14.0 | >= 2.1 |
+   |  < 0.0.4 | >= v0.12.0 | >= 1.9 |
 
 == Installation
 
@@ -24,7 +24,7 @@ Simply use RubyGems:
 
 === v1.0 style
 
-With fluentd v1.0 and fluent-plugin-swift v1.0.0, use new buffer configuration to dynamic parameters.
+With fluentd v1.0 and fluent-plugin-swift >=v0.0.4, use new buffer configuration to dynamic parameters.
 
 
     <match pattern>
@@ -54,15 +54,48 @@ With fluentd v1.0 and fluent-plugin-swift v1.0.0, use new buffer configuration t
 
     </match>
 
-[auth_url] Authentication URL. Keystone Auth isn't tested yet.
+Use OpenStack environment variables to configure parameters dynamically
 
-[auth_user] Authentication User Name. if you use TempAuth, auth_user is ACCOUNT:USER .
+    <match pattern>
+      @type swift
 
-[auth_tenant (optional, for keystone)] Authentication Tenant. if you use TempAuth, this isn't required.
+      auth_url "#{ENV['OS_AUTH_URL']}"
+      project_name "#{ENV['OS_PROJECT_NAME']}"
+      auth_user "#{ENV['OS_USERNAME']}"
+      auth_api_key "#{ENV['OS_PASSWORD']}"
+      domain_name  "#{ENV['OS_PROJECT_DOMAIN_NAME']}"
+      auth_region "#{ENV['OS_REGION_NAME']}"
+      swift_container CONTAINER_NAME
+      ssl_verify false
 
-[auth_api_key] Authentication Key (Password).
+      path logs/
+      swift_object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
+      <buffer tag,time>
+        @type file
+        path /var/log/fluent/swift
+        timekey 3600 # 1 hour partition
+        timekey_wait 10m
+        timekey_use_utc true # use utc
+      </buffer>
+      <format>
+        @type json
+      </format>
 
-[auth_region] Authentication Region. Optional, not required if there is only one region available.
+    </match>
+
+
+[auth_url] Authentication URL. If not set in conf, use env OS_AUTH_URL
+
+[auth_user] Authentication User Name. if you use TempAuth, auth_user is ACCOUNT:USER . If not set in conf, use env OS_USERNAME
+
+[auth_tenant (optional, for keystone v2)] Authentication Tenant. if you use TempAuth, this isn't required.
+
+[project_name (keystone v3)] Authentication Project. If not set in conf, use env OS_PROJECT_NAME
+[domain_name (keystone v3)] Authentication Domain. If not set in conf, use env OS_PROJECT_DOMAIN_NAME
+
+[auth_api_key] Authentication Key (Password). If not set in conf, use env OS_PASSWORD
+
+[auth_region] Authentication Region. Optional, not required if there is only one region available. If not set in conf, use env OS_REGION_NAME
 
 [swift_account (optional)] Account name. if this isn't provided, use default Account.
 

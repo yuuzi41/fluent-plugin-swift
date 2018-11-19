@@ -10,8 +10,19 @@ class SwiftOutputTest < Test::Unit::TestCase
     Dir.glob('test/tmp/*').each {|file| FileUtils.rm_f(file) }
   end
 
+  CONFIG_NONE = %[
+    swift_container CONTAINER_NAME
+  ]
+
+  CONFIG_ENV = %[
+    swift_container CONTAINER_NAME
+    auth_url "#{ENV['EMPTY_OS_AUTH_URL']}"
+    auth_user test:tester
+    auth_api_key testing
+  ]
+
   CONFIG = %[
-    auth_url https://127.0.0.1/auth/v1.0
+    auth_url https://127.0.0.1/auth/v3
     auth_user test:tester
     auth_api_key testing
     domain_name default
@@ -45,10 +56,20 @@ class SwiftOutputTest < Test::Unit::TestCase
     end.configure(conf)
   end
 
+  def test_auth_url_absent
+    assert_raise_message(/'auth_url' parameter is required/) do
+      create_driver(CONFIG_NONE)
+    end
+  end
+
+  def test_auth_url_empty
+    assert_raise_message(/auth_url parameter or OS_AUTH_URL variable not defined/) do
+      create_driver(CONFIG_ENV)
+    end
+  end
+
   def test_configure
-#  test 'test_configure' do
     d = create_driver(CONFIG)
-    assert_equal 'https://127.0.0.1/auth/v1.0', d.instance.auth_url
     assert_equal 'test:tester', d.instance.auth_user
     assert_equal 'testing', d.instance.auth_api_key
     assert_equal 'RegionOne', d.instance.auth_region
